@@ -18,19 +18,24 @@ function App() {
     fetchItems();
   }, []);
 
-  // NEW: Function to handle the checkout POST request
   const handleCheckout = async (itemId) => {
     try {
-      // Sending the item ID and a generic test name to the backend
       await axios.post('http://localhost:5000/api/checkout', {
         itemId: itemId,
         borrowerName: 'Team Member' 
       });
-      
-      // Re-fetch the items to instantly update the UI quantities
       fetchItems(); 
     } catch (error) {
       console.error('Checkout failed:', error);
+    }
+  };
+
+  const handleReturn = async (itemId) => {
+    try {
+      await axios.post('http://localhost:5000/api/return', { itemId: itemId });
+      fetchItems(); 
+    } catch (error) {
+      console.error('Return failed:', error);
     }
   };
 
@@ -44,14 +49,25 @@ function App() {
             <div className="stock-info">
               Available: {item.availableQuantity} / {item.totalQuantity}
             </div>
-            {/* NEW: Added onClick handler to the button */}
-            <button 
-              className="checkout-btn"
-              disabled={item.availableQuantity <= 0}
-              onClick={() => handleCheckout(item._id)}
-            >
-              {item.availableQuantity > 0 ? 'Checkout Item' : 'Out of Stock'}
-            </button>
+            
+            <div className="button-group">
+              <button 
+                className="checkout-btn"
+                disabled={item.availableQuantity <= 0}
+                onClick={() => handleCheckout(item._id)}
+              >
+                {item.availableQuantity > 0 ? 'Checkout' : 'Empty'}
+              </button>
+              
+              <button 
+                className="return-btn"
+                disabled={item.availableQuantity >= item.totalQuantity}
+                onClick={() => handleReturn(item._id)}
+              >
+                Return
+              </button>
+            </div>
+
           </div>
         ))}
       </div>
